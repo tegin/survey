@@ -32,3 +32,13 @@ class SurveyUserInput(models.Model):
             ):
                 questions_to_hide |= question
         return questions_to_hide
+
+    def _get_inactive_conditional_questions(self):
+        return (
+            super()
+            ._get_inactive_conditional_questions()
+            .filtered(
+                lambda r: r.triggering_question_type
+                in ["simple_choice", "multiple_choice"]
+            )
+        )

@@ -6,7 +6,7 @@ from odoo import api, fields, models
 
 
 class SurveyUserInputLine(models.Model):
-    _inherit = "survey.user_input_line"
+    _inherit = "survey.user_input.line"
 
     hidden = fields.Boolean(
         help=(
