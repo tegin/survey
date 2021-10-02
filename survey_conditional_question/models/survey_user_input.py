@@ -34,11 +34,25 @@ class SurveyUserInput(models.Model):
         return questions_to_hide
 
     def _get_inactive_conditional_questions(self):
-        return (
-            super()
-            ._get_inactive_conditional_questions()
-            .filtered(
-                lambda r: r.triggering_question_type
-                in ["simple_choice", "multiple_choice"]
+        result = super()._get_inactive_conditional_questions()
+        inactive_questions = self.env["survey.question"]
+        for question in result:
+            if question.triggering_question_type in [
+                "simple_choice",
+                "multiple_choice",
+            ]:
+                inactive_questions |= question
+                continue
+            result = self.user_input_line_ids.filtered(
+                lambda r: r.question_id == question.triggering_question_id
             )
-        )
+            if (
+                result
+                and result.value_numerical_box
+                and question.conditional_minimum_value
+                <= result.value_numerical_box
+                <= question.conditional_maximum_value
+            ):
+                continue
+            inactive_questions |= question
+        return inactive_questions
